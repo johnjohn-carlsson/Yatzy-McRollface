@@ -11,72 +11,144 @@ class YatzyPlayer():
 
     def get_players(self):
         return self.players
+    
+    def final_score_calculator(self, scores:list):
+        # Here we iterate through each players score dictionary and calculate totals
+        pass
 
 
 
 class Player():
     def __init__(self, name: str) -> None:
         self.name = name
-        self.all_dice = [0] * 6
-        self.saved_dice = []
-        self.score = 0
+        self.saved_dice = {
+            1:None,
+            2:None,
+            3:None,
+            4:None,
+            5:None
+        }
+        self.scores = {
+            "ones":None,
+            "twos":None,
+            "threes": None,
+            "fours": None,
+            "fives": None,
+            "sixes": None,
+            "three of a kind": None,
+            "four of a kind": None,
+            "full house": None,
+            "small straight": None,
+            "large straight": None,
+            "chance": None,
+            "yatzy mcrollface!": None
+        }
+        
 
     def __repr__(self) -> str:
         return self.name
+    
+    def reset_saved_dice(self):
+        self.saved_dice = {
+            1:None,
+            2:None,
+            3:None,
+            4:None,
+            5:None
+        }
+
+    def get_saved_dice(self):
+        saved_dice_values = []
+
+        for key,value in self.saved_dice.items():
+            if value is not None:
+                saved_dice_values.append(value)
+
+        return saved_dice_values
 
     def play_turn(self, dice, screenclear):
-        # Reset saved dice for this turn
-        self.saved_dice = []
+        
+        self.reset_saved_dice()
 
-        rolled_dice = []
-
-        # Three dice throws per turn (including final result)
-        for turn in range(2):
+        # Logic for two reroll rounds
+        for round in range(2):
+            
             screenclear()
 
-            print(f"{self.name}, turn {turn + 1}")
+            # Make a new roll with saved dice if there are any
+            saved_dice = self.get_saved_dice()
+            rolled_dice = self.roll_dice(saved_dice)
 
-            # Show saved dice if any
-            if self.saved_dice:
-                print("Saved dice:", self.saved_dice)
+            # Print out round and dice info
+            print(f"Round {round+1} - {self.name}")
+            dice.print_dice(rolled_dice)
 
-            # Roll unsaved dice
-            remaining_dice = 6 - len(self.saved_dice)
-            rolled_dice = self.roll_dice(remaining_dice)
+            # Check if user saves dice
+            new_dice_to_save = input("Select dice 1 - 5 to save (eg '123'):\n")
+            if new_dice_to_save:
 
-            # Display both saved and newly rolled dice
-            dice.print_dice(self.saved_dice + rolled_dice)
+                list_of_dice_to_save = []
+                for number in new_dice_to_save:
+                    list_of_dice_to_save.append(rolled_dice[int(number)-1])
 
-            # Ask player which dice to save
-            dice_to_save = input("Select which dice to save (eg. '1,2,3'):\n")
+                self.save_dice(list_of_dice_to_save)
 
-            if dice_to_save:
-                dice_to_save = dice_to_save.split(",")
-
-                # Update saved_dice based on player's input
-                new_saved_dice = []
-                for n in dice_to_save:
-                    new_saved_dice.append(rolled_dice[int(n) - 1])
-
-                self.saved_dice.extend(new_saved_dice)
-
-        # After three turns, the final dice are the saved dice plus any unsaved dice from the last roll
-        self.all_dice = self.saved_dice + rolled_dice[:6 - len(self.saved_dice)]
-
+        # Logic for the final scoring round
         screenclear()
 
-        print(f"Final dice for {self.name}:")
-        dice.print_dice(self.all_dice)
+        saved_dice = self.get_saved_dice()
+        rolled_dice = self.roll_dice(saved_dice)
+
+        print(f"Final round - {self.name}")
+        dice.print_dice(rolled_dice)
+        available_scores_dictionary = self.print_available_scores()
+        selected_score = input("")
+
+        self.set_new_score(available_scores_dictionary, selected_score, rolled_dice)  
+
+        print("UPDATED SCORE:")
+        for key,value in self.scores.items():
+            print(key, value)
         input()
 
-    def roll_dice(self, amount_of_dice: int = 6) -> list:
-        return [random.randint(1, 6) for _ in range(amount_of_dice)]
+    def set_new_score(self, available_scores_dictionary, selected_score, final_dice):
+        for key, value in available_scores_dictionary.items():
+            if key == int(selected_score):
+                self.scores[value.lower()] = final_dice
+
+    def print_available_scores(self):
+        available_scores_dictionary = {}
+        n = 1
+
+        for key,value in self.scores.items():
+            if value == None:
+                available_scores_dictionary[n] = key
+                print(f"{n}: {key.title()}")
+                n += 1
+
+        return available_scores_dictionary
+
+    def roll_dice(self, saved_dice:list) -> list:
+        # If there are saved dice, we make 5 - saved_dice new rolls
+        if saved_dice:
+            new_dicevalues = [random.randint(1, 6) for _ in range((5-len(saved_dice)))]
+            for value in new_dicevalues:
+                saved_dice.append(value)
+
+            return saved_dice
+
+        # If there are no saved dice we make 6 new rolls
+        return [random.randint(1, 6) for _ in range(5)]
 
     def save_dice(self, values: list):
-        self.saved_dice = values[:]
+        self.reset_saved_dice()
+
+        for n, value in enumerate(values):
+            self.saved_dice[n+1] = value
+
 
     def get_saved_dice(self) -> list:
-        return self.saved_dice if self.saved_dice else None
+        return [value for key, value in self.saved_dice.items() if value != None]
 
 
     
@@ -93,7 +165,7 @@ class DiceDrawer():
         }
 
     def print_dice(self, results: list):
-        dice_rows = ["", "", "", "", "", ""]
+        dice_rows = ["", "", "", "", ""]
 
         for result in results:
             face = self.dice_faces[result]

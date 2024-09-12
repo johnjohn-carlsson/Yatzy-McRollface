@@ -12,6 +12,11 @@ class UserInterface():
         os.system('cls')
 
     def launch(self):
+        self.setup_players()
+        self.run_main_game()
+        self.end_game()
+
+    def setup_players(self):
         # ----------------------------------------------------
         # ------------ SET UP PLAYERS BEFORE GAME ------------
         # ----------------------------------------------------
@@ -32,15 +37,12 @@ class UserInterface():
 
         self.logic.set_players(list_of_new_players)
 
+    def run_main_game(self):
         # ----------------------------------------------------
         # -------------- RUN MAIN PART OF GAME ---------------
         # ----------------------------------------------------
 
-        self.run_main_game()
-
-    def run_main_game(self):
-
-        while True:
+        for _ in range(13):
             self.play_turn()
 
     def play_turn(self):
@@ -49,5 +51,12 @@ class UserInterface():
 
             self.screenclear()
             player.play_turn(self.dice, self.screenclear)
+
+    def end_game(self):
+        # ----------------------------------------------------
+        # -------------- CALCULATE FINAL SCORES --------------
+        # ----------------------------------------------------
+
+        self.logic.final_score_calculator()
 
             
