@@ -1,5 +1,5 @@
 import random
-import os
+from collections import Counter
 
 class YatzyPlayer():
     def __init__(self) -> None:
@@ -12,9 +12,66 @@ class YatzyPlayer():
     def get_players(self):
         return self.players
     
-    def final_score_calculator(self, scores:list):
-        # Here we iterate through each players score dictionary and calculate totals
-        pass
+    def final_score_calculator(self):
+        final_scores_dictionary = {}
+
+        for player in self.players:
+            score = 0
+
+            for key, value in player.scores.items():
+
+                if key == "ones":
+                    score += sum([x for x in value if x == 1])
+
+                elif key == "twos":
+                    score += sum([x for x in value if x == 2])
+
+                elif key == "threes":
+                    score += sum([x for x in value if x == 3])
+
+                elif key == "fours":
+                    score += sum([x for x in value if x == 4])
+
+                elif key == "fives":
+                    score += sum([x for x in value if x == 5])
+
+                elif key == "sixes":
+                    score += sum([x for x in value if x == 6])
+
+                elif key == "three of a kind":
+                    dice_counts = Counter(value)  # Count occurrences of each die value
+                    if any(count >= 3 for count in dice_counts.values()):
+                        score += sum(value)
+
+                elif key == "four of a kind":
+                    dice_counts = Counter(value)
+                    if any(count >= 4 for count in dice_counts.values()):
+                        score += sum(value)
+
+                elif key == "full house":
+                    dice_counts = Counter(value) 
+                    if sorted(dice_counts.values()) == [2, 3]:  # Check for one pair and one triplet
+                        score += sum(value)
+
+                elif key == "small straight":
+                    if sorted(set(value)) == [1, 2, 3, 4, 5]:
+                        score += 15
+
+                elif key == "large staight":
+                    if sorted(set(value)) == [2, 3, 4, 5, 6]:
+                        score += 20
+
+                elif key == "chance":
+                    score += sum(value)
+
+                elif key == "yatzy mcrollface!":
+                    if len(set(value)) == 1:  # All dice must be the same
+                        score += 50
+
+            final_scores_dictionary[player.name] = score
+
+        return final_scores_dictionary
+
 
 
 
@@ -35,6 +92,8 @@ class Player():
             "fours": None,
             "fives": None,
             "sixes": None,
+            "one pair": None,
+            "two pairs": None,
             "three of a kind": None,
             "four of a kind": None,
             "full house": None,
@@ -99,16 +158,23 @@ class Player():
         saved_dice = self.get_saved_dice()
         rolled_dice = self.roll_dice(saved_dice)
 
-        print(f"Final round - {self.name}")
+        print(f"Points round - {self.name}")
         dice.print_dice(rolled_dice)
         available_scores_dictionary = self.print_available_scores()
+        print("Select points category:")
         selected_score = input("")
-
+        
+        # Insert score at chosen category
         self.set_new_score(available_scores_dictionary, selected_score, rolled_dice)  
 
+        # Display all categories
+        screenclear()
         print("UPDATED SCORE:")
         for key,value in self.scores.items():
-            print(key, value)
+            if value == None:
+                print(key)
+            else:
+                print(key, value)
         input()
 
     def set_new_score(self, available_scores_dictionary, selected_score, final_dice):
@@ -156,12 +222,12 @@ class DiceDrawer():
     def __init__(self) -> None:
         # Visual graphics of the dice
         self.dice_faces = {
-            1: ["-----", "|   |", "| * |", "|   |", "-----"],
-            2: ["-----", "|*  |", "|   |", "|  *|", "-----"],
-            3: ["-----", "|*  |", "| * |", "|  *|", "-----"],
-            4: ["-----", "|* *|", "|   |", "|* *|", "-----"],
-            5: ["-----", "|* *|", "| * |", "|* *|", "-----"],
-            6: ["-----", "|* *|", "|* *|", "|* *|", "-----"]
+            1: [".---------.", "|         |", "|    o    |", "|         |", "'---------'"],
+            2: [".---------.", "|  o      |", "|         |", "|      o  |", "'---------'"],
+            3: [".---------.", "|  o      |", "|    o    |", "|      o  |", "'---------'"],
+            4: [".---------.", "|  o   o  |", "|         |", "|  o   o  |", "'---------'"],
+            5: [".---------.", "|  o   o  |", "|    o    |", "|  o   o  |", "'---------'"],
+            6: [".---------.", "|  o   o  |", "|  o   o  |", "|  o   o  |", "'---------'"]
         }
 
     def print_dice(self, results: list):
