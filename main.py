@@ -1,4 +1,5 @@
 from interface import *
 
-game = UserInterface()
-game.launch()
+if __name__ == "__main__":
+    game = UserInterface()
+    game.launch()

@@ -23,7 +23,9 @@ class UserInterface():
 
         self.screenclear()
         self.print_logo()
-        amount_of_players = int(input("                      PLEASE ENTER AMOUNT OF PLAYERS: "))
+        amount_of_players = int(input(
+            "                      PLEASE ENTER AMOUNT OF PLAYERS: "
+            ))
 
         list_of_new_players = []
         
