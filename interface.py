@@ -3,15 +3,19 @@ import os
 
 class UserInterface():
     def __init__(self) -> None:
-        
         # Initialize classes
+
         self.logic = YatzyPlayer()
         self.dice = DiceDrawer()
 
     def screenclear(self):
+        # Clear the terminal
+
         os.system('cls')
 
     def launch(self):
+        # The full game loop
+
         self.setup_players()
         self.run_main_game()
         self.end_game()
@@ -73,6 +77,10 @@ class UserInterface():
 
     
     def print_logo(self):
+        # ----------------------------------------------------
+        # ------------------ LOGO CREATOR --------------------
+        # ----------------------------------------------------
+
         print("                                WELCOME TO                                  ")
         print("                                                                            ")
         print(" __     __   _               __  __      _____       _ _  __                ")

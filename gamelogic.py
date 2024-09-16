@@ -12,31 +12,58 @@ class YatzyPlayer():
     def get_players(self):
         return self.players
     
-    def final_score_calculator(self):
+    def final_score_calculator(self) -> dict:
+        # Return final score dictionary in the form of [Player Name] = Score
+
         final_scores_dictionary = {}
 
         for player in self.players:
+            bonus_score_counter = 0
             score = 0
 
             for key, value in player.scores.items():
 
                 if key == "ones":
-                    score += sum([x for x in value if x == 1])
+                    points = sum([x for x in value if x == 1])
+                    score += points
+                    bonus_score_counter += points
 
                 elif key == "twos":
-                    score += sum([x for x in value if x == 2])
+                    points = sum([x for x in value if x == 2])
+                    score += points
+                    bonus_score_counter += points
 
                 elif key == "threes":
-                    score += sum([x for x in value if x == 3])
+                    points = sum([x for x in value if x == 3])
+                    score += points
+                    bonus_score_counter += points
 
                 elif key == "fours":
-                    score += sum([x for x in value if x == 4])
+                    points = sum([x for x in value if x == 4])
+                    score += points
+                    bonus_score_counter += points
 
                 elif key == "fives":
-                    score += sum([x for x in value if x == 5])
+                    points = sum([x for x in value if x == 5])
+                    score += points
+                    bonus_score_counter += points
 
                 elif key == "sixes":
-                    score += sum([x for x in value if x == 6])
+                    points = sum([x for x in value if x == 6])
+                    score += points
+                    bonus_score_counter += points
+
+                elif key == "one pair":
+                    dice_counts = Counter(value)
+                    pairs = [die for die, count in dice_counts.items() if count >= 2]
+                    if pairs:
+                        score += max(pairs) * 2  # Add the highest pair
+
+                elif key == "two pairs":
+                    dice_counts = Counter(value)
+                    pairs = [die for die, count in dice_counts.items() if count >= 2 and count <= 3]
+                    if len(pairs) >= 2:
+                        score += sum(p * 2 for p in pairs[:2])  # Add the sum of both pairs
 
                 elif key == "three of a kind":
                     dice_counts = Counter(value)  # Count occurrences of each die value
@@ -68,6 +95,9 @@ class YatzyPlayer():
                     if len(set(value)) == 1:  # All dice must be the same
                         score += 50
 
+            # If your upper score was more than 63 you get 50 extra points
+            if bonus_score_counter >= 63: score += 50
+
             final_scores_dictionary[player.name] = score
 
         return final_scores_dictionary
@@ -85,6 +115,8 @@ class Player():
             4:None,
             5:None
         }
+
+        # For each round we replace None with a set of dice values
         self.scores = {
             "ones":None,
             "twos":None,
@@ -116,7 +148,9 @@ class Player():
             5:None
         }
 
-    def get_saved_dice(self):
+    def get_saved_dice(self) -> list:
+        # If there are dice that are not None; we return them in a list.
+
         saved_dice_values = []
 
         for key,value in self.saved_dice.items():
@@ -127,6 +161,7 @@ class Player():
 
     def play_turn(self, dice, screenclear):
         
+        # Make sure no saved dice from last round are counted
         self.reset_saved_dice()
 
         # Logic for two reroll rounds
@@ -178,11 +213,14 @@ class Player():
         input()
 
     def set_new_score(self, available_scores_dictionary, selected_score, final_dice):
+        # Find the correct category in scores and insert the final dice score
+
         for key, value in available_scores_dictionary.items():
             if key == int(selected_score):
                 self.scores[value.lower()] = final_dice
 
     def print_available_scores(self):
+        # Print the scores that are still set as None
         available_scores_dictionary = {}
         n = 1
 
@@ -195,7 +233,8 @@ class Player():
         return available_scores_dictionary
 
     def roll_dice(self, saved_dice:list) -> list:
-        # If there are saved dice, we make 5 - saved_dice new rolls
+        # If there are saved dice, we make (5 - saved dice) new rolls
+
         if saved_dice:
             new_dicevalues = [random.randint(1, 6) for _ in range((5-len(saved_dice)))]
             for value in new_dicevalues:
@@ -220,7 +259,8 @@ class Player():
     
 class DiceDrawer():
     def __init__(self) -> None:
-        # Visual graphics of the dice
+        # Visual graphics of the dice, one row per full die
+
         self.dice_faces = {
             1: [".---------.", "|         |", "|    o    |", "|         |", "'---------'"],
             2: [".---------.", "|  o      |", "|         |", "|      o  |", "'---------'"],
