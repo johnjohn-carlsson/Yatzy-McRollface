@@ -27,16 +27,25 @@ class UserInterface():
 
         self.screenclear()
         self.print_logo()
-        amount_of_players = int(input(
-            "                      PLEASE ENTER AMOUNT OF PLAYERS: "
-            ))
+
+        while True:
+            amount_of_players = input(
+                "                      PLEASE ENTER AMOUNT OF PLAYERS: "
+                )
+            
+            if amount_of_players.isnumeric():
+                break
+
+            else:
+                print("                   Please enter a valid amount of players...")
+            
 
         list_of_new_players = []
         
         self.screenclear()
 
         # Create and store players with their names
-        for n in range(amount_of_players):
+        for n in range(int(amount_of_players)):
             name = input(f"Enter name for player {n+1}:\n")
 
             new_player = Player(name)

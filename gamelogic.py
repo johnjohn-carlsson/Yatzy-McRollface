@@ -177,15 +177,26 @@ class Player():
             print(f"Round {round+1} - {self.name}")
             dice.print_dice(rolled_dice)
 
-            # Check if user saves dice
             new_dice_to_save = input("Select dice 1 - 5 to save (eg '123'):\n")
+
             if new_dice_to_save:
+                valid_numbers = {'1', '2', '3', '4', '5'}
+                valid_input = True
 
-                list_of_dice_to_save = []
+                # Check if input is valid
                 for number in new_dice_to_save:
-                    list_of_dice_to_save.append(rolled_dice[int(number)-1])
+                    if number not in valid_numbers:
+                        valid_input = False
+                        break
 
-                self.save_dice(list_of_dice_to_save)
+                if valid_input:
+                    # Save selected dice if valid input
+
+                    list_of_dice_to_save = []
+                    for number in new_dice_to_save:
+                        list_of_dice_to_save.append(rolled_dice[int(number) - 1])
+
+                    self.save_dice(list_of_dice_to_save)
 
         # Logic for the final scoring round
         screenclear()
@@ -195,9 +206,18 @@ class Player():
 
         print(f"Points round - {self.name}")
         dice.print_dice(rolled_dice)
+
         available_scores_dictionary = self.print_available_scores()
+        valid_scores = [str(key) for key in available_scores_dictionary.keys()]
+
         print("Select points category:")
         selected_score = input("")
+        
+        # Check that input is valid
+        while selected_score not in valid_scores:
+            print(f"Invalid selection.")
+            selected_score = input("")
+
         
         # Insert score at chosen category
         self.set_new_score(available_scores_dictionary, selected_score, rolled_dice)  
